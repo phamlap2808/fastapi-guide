@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Sequence
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import get_password_hash
@@ -35,6 +35,11 @@ async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
 async def list_users(db: AsyncSession, skip: int = 0, limit: int = 50) -> Sequence[User]:
     result = await db.execute(select(User).offset(skip).limit(limit))
     return result.scalars().all()
+
+
+async def count_users(db: AsyncSession) -> int:
+    result = await db.execute(select(func.count()).select_from(User))
+    return int(result.scalar_one())
 
 
 async def update_user(db: AsyncSession, user_id: UUID, data: UserUpdate) -> User | None:
